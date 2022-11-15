@@ -1,0 +1,86 @@
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: echoserver
+#   namespace: wik-dps-tp04
+# spec:
+#   containers:
+#   - name: echoserver
+#     image: registry.cluster.wik.cloud/public/echo
+#     ports:
+#     - containerPort: 8080
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-service
+  namespace: wik-dps-tp04
+spec:
+  selector: # étiquette de reconnaissance 
+    wik-dps : tp04
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 8080
+
+# ---
+
+# apiVersion: apps/v1
+# kind: ReplicaSet
+# metadata:
+#   name: echoserver
+#   labels:
+#     app: echo
+#     replica: four
+# spec:
+#   replicas: 4
+#   selector:
+#     matchLabels:
+#       wik-dps: tp04
+#   template:
+#     metadata:
+#       labels:
+#         wik-dps: tp04
+#     spec:
+#       containers:
+#       - name: echoserver
+#         image: registry.cluster.wik.cloud/public/echo
+#         ports:
+#         - containerPort: 8080
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoserver
+  namespace: wik-dps-tp04
+  labels:
+    app: echoserver
+
+spec:
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+  selector:
+    matchLabels:
+      wik-dps : tp04
+  template:
+    metadata:
+      labels:
+        wik-dps : tp04
+    spec:
+      containers:
+      - name: echoserver
+        image: registry.cluster.wik.cloud/public/echo
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 60m
+            memory: 50Mi
+          limits:
+            cpu: 60m
+            memory: 50Mi
